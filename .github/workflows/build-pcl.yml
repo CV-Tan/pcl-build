@@ -1,0 +1,153 @@
+name: Build PCL 1.12.1 (No VTK)
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: '选择构建平台'
+        required: true
+        type: choice
+        options:
+          - windows-latest
+          - ubuntu-20.04
+      build_type:
+        description: '构建类型'
+        required: true
+        type: choice
+        options:
+          - Release
+          - Debug
+        default: 'Release'
+
+env:
+  PCL_VERSION: 1.12.1
+  BUILD_TYPE: ${{ github.event.inputs.build_type }}
+
+jobs:
+  build-windows:
+    if: github.event.inputs.platform == 'windows-latest'
+    runs-on: windows-latest
+    
+    steps:
+    - name: 检出 PCL 源码
+      uses: actions/checkout@v4
+      with:
+        repository: PointCloudLibrary/pcl
+        ref: pcl-${{ env.PCL_VERSION }}
+        submodules: recursive
+
+    - name: 配置 MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: 安装依赖 (vcpkg)
+      run: |
+        # 使用 vcpkg 安装 PCL 依赖（不含VTK）
+        git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+        cd C:\vcpkg
+        .\bootstrap-vcpkg.bat
+        .\vcpkg install eigen3:x64-windows boost:x64-windows flann:x64-windows qhull:x64-windows openni2:x64-windows
+
+    - name: 配置 CMake (Superbuild - No VTK)
+      run: |
+        mkdir build
+        cd build
+        cmake .. `
+          -G "Visual Studio 17 2022" `
+          -A x64 `
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} `
+          -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake `
+          -DWITH_VTK=OFF `
+          -DBUILD_visualization=OFF `
+          -DBUILD_apps=OFF `
+          -DBUILD_examples=OFF `
+          -DBUILD_tests=OFF `
+          -DBUILD_global_tests=OFF `
+          -DPCL_SHARED_LIBS=ON `
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+
+    - name: 编译 PCL
+      run: |
+        cd build
+        cmake --build . --config ${{ env.BUILD_TYPE }} --parallel 2
+
+    - name: 安装 PCL
+      run: |
+        cd build
+        cmake --install . --config ${{ env.BUILD_TYPE }}
+
+    - name: 打包构建产物
+      run: |
+        cd install
+        7z a ../pcl-${{ env.PCL_VERSION }}-windows-x64-no-vtk.zip *
+
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: pcl-${{ env.PCL_VERSION }}-windows-x64-no-vtk
+        path: pcl-${{ env.PCL_VERSION }}-windows-x64-no-vtk.zip
+        retention-days: 30
+
+  build-ubuntu:
+    if: github.event.inputs.platform == 'ubuntu-20.04'
+    runs-on: ubuntu-20.04
+    
+    steps:
+    - name: 检出 PCL 源码
+      uses: actions/checkout@v4
+      with:
+        repository: PointCloudLibrary/pcl
+        ref: pcl-${{ env.PCL_VERSION }}
+        submodules: recursive
+
+    - name: 安装系统依赖
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          pkg-config \
+          libeigen3-dev \
+          libboost-all-dev \
+          libflann-dev \
+          libqhull-dev \
+          libopenni2-dev \
+          libusb-1.0-0-dev
+
+    - name: 配置 CMake (Superbuild - No VTK)
+      run: |
+        mkdir build
+        cd build
+        cmake .. \
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+          -DWITH_VTK=OFF \
+          -DBUILD_visualization=OFF \
+          -DBUILD_apps=OFF \
+          -DBUILD_examples=OFF \
+          -DBUILD_tests=OFF \
+          -DBUILD_global_tests=OFF \
+          -DPCL_SHARED_LIBS=ON \
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+
+    - name: 编译 PCL
+      run: |
+        cd build
+        cmake --build . --config ${{ env.BUILD_TYPE }} -j$(nproc)
+
+    - name: 安装 PCL
+      run: |
+        cd build
+        cmake --install .
+
+    - name: 打包构建产物
+      run: |
+        cd install
+        tar -czf ../pcl-${{ env.PCL_VERSION }}-ubuntu-x64-no-vtk.tar.gz *
+
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: pcl-${{ env.PCL_VERSION }}-ubuntu-x64-no-vtk
+        path: pcl-${{ env.PCL_VERSION }}-ubuntu-x64-no-vtk.tar.gz
+        retention-days: 30
