@@ -1,6 +1,7 @@
 {
   "name": "pcl-build",
   "version-string": "1.12.1",
+  "builtin-baseline": "55e9b5f8d3a8e9c0b1f2a3d4c5b6a7f8e9d0c1b2",
   "dependencies": [
     "eigen3",
     "boost-chrono",
