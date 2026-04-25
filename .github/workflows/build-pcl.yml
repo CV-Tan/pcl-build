@@ -29,6 +29,11 @@ jobs:
     runs-on: windows-2022
     
     steps:
+    - name: 检出当前仓库 (获取 vcpkg.json)
+      uses: actions/checkout@v4
+      with:
+        path: repo
+
     - name: 检出 PCL 源码
       uses: actions/checkout@v4
       with:
@@ -84,7 +89,7 @@ jobs:
     - name: 复制 vcpkg.json 到源码目录
       shell: powershell
       run: |
-        Copy-Item -Path "${{ github.workspace }}/vcpkg.json" -Destination "${{ github.workspace }}/pcl-src/vcpkg.json" -Force
+        Copy-Item -Path "${{ github.workspace }}/repo/vcpkg.json" -Destination "${{ github.workspace }}/pcl-src/vcpkg.json" -Force
 
     - name: 配置 MSVC
       uses: ilammy/msvc-dev-cmd@v1
