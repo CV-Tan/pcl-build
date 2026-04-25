@@ -1,0 +1,84 @@
+{
+  "name": "pcl-build",
+  "version-string": "1.12.1",
+  "dependencies": [
+    {
+      "name": "eigen3",
+      "version>=": "3.4.0"
+    },
+    {
+      "name": "boost-chrono",
+      "version>=": "1.78.0"
+    },
+    {
+      "name": "boost-date-time",
+      "version>=": "1.78.0"
+    },
+    {
+      "name": "boost-filesystem",
+      "version>=": "1.78.0"
+    },
+    {
+      "name": "boost-io",
+      "version>=": "1.78.0"
+    },
+    {
+      "name": "boost-system",
+      "version>=": "1.78.0"
+    },
+    {
+      "name": "boost-thread",
+      "version>=": "1.78.0"
+    },
+    {
+      "name": "flann",
+      "version>=": "1.9.2"
+    },
+    {
+      "name": "qhull",
+      "version>=": "8.0.2"
+    },
+    {
+      "name": "openni2",
+      "version>=": "2.2.0.33"
+    }
+  ],
+  "overrides": [
+    {
+      "name": "eigen3",
+      "version": "3.4.0"
+    },
+    {
+      "name": "boost-chrono",
+      "version": "1.78.0#3"
+    },
+    {
+      "name": "boost-date-time",
+      "version": "1.78.0#3"
+    },
+    {
+      "name": "boost-filesystem",
+      "version": "1.78.0#3"
+    },
+    {
+      "name": "boost-io",
+      "version": "1.78.0#3"
+    },
+    {
+      "name": "boost-system",
+      "version": "1.78.0#3"
+    },
+    {
+      "name": "boost-thread",
+      "version": "1.78.0#3"
+    },
+    {
+      "name": "flann",
+      "version": "1.9.2#6"
+    },
+    {
+      "name": "qhull",
+      "version": "8.0.2#1"
+    }
+  ]
+}

@@ -66,14 +66,12 @@ jobs:
 
     - name: 安装依赖 (vcpkg)
       run: |
-        # 使用 vcpkg 安装 PCL 1.12.1 兼容的依赖版本
-        # PCL 1.12.1 发布于 2021-12-21，使用对应时间点的 vcpkg commit
+        # 使用 vcpkg 清单模式安装 PCL 1.12.1 兼容的依赖版本
         git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
         cd C:\vcpkg
-        # 切换到 2021-12-20 的 commit (与 PCL 1.12.1 发布时间匹配)
-        git checkout a1a19d5d4b2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
         .\bootstrap-vcpkg.bat
-        .\vcpkg install eigen3:x64-windows boost:x64-windows flann:x64-windows qhull:x64-windows openni2:x64-windows
+        # 使用清单模式安装依赖（版本在 vcpkg.json 中指定）
+        .\vcpkg install --triplet x64-windows --manifest-root=${{ github.workspace }}
 
     - name: 配置 CMake (Superbuild - No VTK)
       run: |
