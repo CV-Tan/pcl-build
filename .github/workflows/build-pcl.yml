@@ -81,6 +81,11 @@ jobs:
             Write-Host "Already patched or no #include found"
         }
 
+    - name: 复制 vcpkg.json 到源码目录
+      shell: powershell
+      run: |
+        Copy-Item -Path "${{ github.workspace }}/vcpkg.json" -Destination "${{ github.workspace }}/pcl-src/vcpkg.json" -Force
+
     - name: 配置 MSVC
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -89,11 +94,14 @@ jobs:
     - name: 安装依赖 (vcpkg)
       run: |
         # 使用 vcpkg 清单模式安装 PCL 1.12.1 兼容的依赖版本
-        git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+        if (-not (Test-Path C:\vcpkg)) {
+          git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+        }
         cd C:\vcpkg
         .\bootstrap-vcpkg.bat
-        # 使用清单模式安装依赖（版本在 vcpkg.json 中指定）
-        .\vcpkg install --triplet x64-windows --manifest-root=${{ github.workspace }}
+        # 使用清单模式安装依赖（版本在 pcl-src/vcpkg.json 中指定）
+        cd ${{ github.workspace }}/pcl-src
+        C:\vcpkg\vcpkg install --triplet x64-windows
 
     - name: 配置 CMake (Superbuild - No VTK)
       run: |
