@@ -43,11 +43,12 @@ jobs:
 
     - name: 安装依赖 (vcpkg)
       run: |
-        # 使用 vcpkg 安装 PCL 依赖（不含VTK）
+        # 使用 vcpkg 安装 PCL 1.12.1 兼容的依赖版本
+        # PCL 1.12.1 推荐: Boost 1.78, Eigen 3.4.0, FLANN 1.9.2, Qhull 8.0.2
         git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
         cd C:\vcpkg
         .\bootstrap-vcpkg.bat
-        .\vcpkg install eigen3:x64-windows boost:x64-windows flann:x64-windows qhull:x64-windows openni2:x64-windows
+        .\vcpkg install eigen3:x64-windows boost@1.78.0:x64-windows flann@1.9.2:x64-windows qhull@8.0.2:x64-windows openni2:x64-windows
 
     - name: 配置 CMake (Superbuild - No VTK)
       run: |
@@ -109,7 +110,13 @@ jobs:
           cmake \
           pkg-config \
           libeigen3-dev \
-          libboost-all-dev \
+          libboost1.74-dev \
+          libboost-chrono1.74-dev \
+          libboost-date-time1.74-dev \
+          libboost-filesystem1.74-dev \
+          libboost-iostreams1.74-dev \
+          libboost-system1.74-dev \
+          libboost-thread1.74-dev \
           libflann-dev \
           libqhull-dev \
           libopenni2-dev \
